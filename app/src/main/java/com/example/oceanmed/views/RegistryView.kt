@@ -35,14 +35,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.oceanmed.dialogs.AddOrUpdatePatientDialog
+import com.example.oceanmed.ui.theme.ContrastBLue
+import com.example.oceanmed.ui.theme.PrimaryBlue
+import com.example.oceanmed.ui.theme.SecondaryBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistryView ( navController: NavController ) {
+    var showPatientDialog by remember { mutableStateOf ( false ) }
     var searchText by remember { mutableStateOf ( "" ) }
 
     // usar una funcion que regrese los pacientes
@@ -81,14 +85,14 @@ fun RegistryView ( navController: NavController ) {
                 },
                 shape = RoundedCornerShape ( 28.dp ),
                 colors = TextFieldDefaults.textFieldColors (
-                    containerColor = Color ( 0xFFF0F0F0 ),
+                    containerColor = SecondaryBlue,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding ( bottom = 16.dp )
-                    .padding ( top = 40.dp )
+                    .padding(bottom = 16.dp)
+                    .padding(top = 40.dp)
             )
 
             LazyColumn {
@@ -101,7 +105,7 @@ fun RegistryView ( navController: NavController ) {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
                         colors = CardDefaults.cardColors (
-                            containerColor = Color ( 0xFF008BB2 )
+                            containerColor = PrimaryBlue
                         )
                     ) {
                         Row (
@@ -117,7 +121,7 @@ fun RegistryView ( navController: NavController ) {
                                 Icon (
                                     Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = SecondaryBlue,
                                     modifier = Modifier.size ( 40.dp )
                                 )
 
@@ -151,16 +155,27 @@ fun RegistryView ( navController: NavController ) {
         }
 
         FloatingActionButton (
-            onClick = { /* TODO: Add new patient */ },
+            onClick = { showPatientDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(0.dp, 0.dp, 20.dp, 40.dp)
+                .padding(0.dp, 0.dp, 20.dp, 40.dp),
+            containerColor = SecondaryBlue
         ) {
             Icon (
                 Icons.Default.Add,
-                contentDescription = "Add"
+                contentDescription = "Add",
+                tint = ContrastBLue
             )
         }
+
+        AddOrUpdatePatientDialog (
+            showDialog = showPatientDialog,
+            onDismiss = { showPatientDialog = false },
+            onSave = { nombre, edad, peso, altura, talla, condicion -> /* TODO */ },
+            dialogTitle = "Añadir Nuevo Paciente",
+            dialogText = "Ingrese los datos del paciente",
+            confirmButtonText = "Añadir"
+        )
     }
 }
 

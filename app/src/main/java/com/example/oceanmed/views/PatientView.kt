@@ -1,5 +1,6 @@
 package com.example.oceanmed.views
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,24 +35,42 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.example.oceanmed.data.RegistryData
+import com.example.oceanmed.dialogs.AddOrUpdatePatientDialog
+import com.example.oceanmed.dialogs.AddRegistryDialog
+import com.example.oceanmed.dialogs.SimpleDialog
+import com.example.oceanmed.ui.theme.ContrastBLue
+import com.example.oceanmed.ui.theme.SecondaryBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientView ( navController: NavController ) {
+    var showRegistryDialog by remember { mutableStateOf ( false ) }
+    var showEditPatientDialog by remember { mutableStateOf ( false ) }
+    var showDeletePatientDialog by remember { mutableStateOf ( false ) }
+    var showDeleteRegistryDialog by remember { mutableStateOf ( false ) }
+
     // guardar en estas variables la info del usuario traida desde la bd
     val nombre: String = "John Doe"
     val edad: Int = 22
-    val peso: Int = 80
+    val peso: Double = 80.0
     val altura: Double = 1.79
     val talla: String = "Mediana"
     val condicion: String = "Diabético"
@@ -83,7 +102,7 @@ fun PatientView ( navController: NavController ) {
     Box (
         modifier = Modifier
             .fillMaxSize()
-            .padding ( top = 20.dp )
+            .padding(top = 20.dp)
     ) {
         TopAppBar (
             title = {
@@ -91,7 +110,8 @@ fun PatientView ( navController: NavController ) {
                     text = "Información del paciente",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding ( start = 20.dp )
+                    modifier = Modifier.padding ( start = 20.dp ),
+                    color = ContrastBLue
                 )
             },
 
@@ -102,32 +122,35 @@ fun PatientView ( navController: NavController ) {
                 ) {
                     Icon (
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = "Back",
+                        tint = ContrastBLue
                     )
                 }
             },
 
             actions = {
                 IconButton (
-                    onClick = { /* TODO: Edit action */ }
+                    onClick = { showEditPatientDialog = true }
                 ) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit"
+                        contentDescription = "Edit",
+                        tint = ContrastBLue
                     )
                 }
                 IconButton (
-                    onClick = { /* TODO: Delete action */ }
+                    onClick = { showDeletePatientDialog = true }
                 ) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete"
+                        contentDescription = "Delete",
+                        tint = ContrastBLue
                     )
                 }
             },
 
             colors = TopAppBarDefaults.topAppBarColors (
-                containerColor = Color ( 0xFFE7FAFC )
+                containerColor = SecondaryBlue
             )
         )
     }
@@ -135,7 +158,7 @@ fun PatientView ( navController: NavController ) {
     Box (
         modifier = Modifier
             .fillMaxSize()
-            .padding ( top = 120.dp )
+            .padding(top = 120.dp)
     ) {
         Column(
             modifier = Modifier
@@ -147,7 +170,7 @@ fun PatientView ( navController: NavController ) {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = CardDefaults.cardColors (
-                    containerColor = Color ( 0xFFE7FAFC )
+                    containerColor = SecondaryBlue
                 )
             ) {
                 Row(
@@ -187,7 +210,7 @@ fun PatientView ( navController: NavController ) {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
                         colors = CardDefaults.cardColors (
-                            containerColor = Color ( 0xFFE7FAFC )
+                            containerColor = SecondaryBlue
                         )
                     ) {
                         Row (
@@ -202,7 +225,7 @@ fun PatientView ( navController: NavController ) {
                             }
                             Spacer ( modifier = Modifier.weight ( 1f ) )
                             IconButton (
-                                onClick = { /* TODO: Handle delete action */ }
+                                onClick = { showDeleteRegistryDialog = true }
                             ) {
                                 Icon (
                                     Icons.Default.Close,
@@ -223,16 +246,55 @@ fun PatientView ( navController: NavController ) {
         }
 
         FloatingActionButton(
-            onClick = { /* TODO: Add action */ },
+            onClick = { showRegistryDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(0.dp, 0.dp, 20.dp, 40.dp)
+                .padding(0.dp, 0.dp, 20.dp, 40.dp),
+            containerColor = SecondaryBlue
         ) {
             Icon (
                 Icons.Default.Add,
-                contentDescription = "Add"
+                contentDescription = "Add",
+                tint = ContrastBLue
             )
         }
+
+        // Editar paciente
+        AddOrUpdatePatientDialog (
+            showDialog = showEditPatientDialog,
+            onDismiss = { showEditPatientDialog = false },
+            onSave = { nombre, edad, peso, altura, talla, condicion -> /* TODO */ },
+            dialogTitle = "Editar Paciente",
+            dialogText = "Ingrese los datos del paciente",
+            confirmButtonText = "Guardar"
+        )
+
+        // Eliminar paciente
+        SimpleDialog (
+            showDialog = showDeletePatientDialog,
+            onDismiss = { showDeletePatientDialog = false },
+            onSave = { /*TODO*/ },
+            dialogTitle = "Eliminar Paciente",
+            dialogText = "La información del paciente se perderá de forma permanente",
+            confirmButtonText = "Eliminar"
+        )
+
+        // Eliminar registro
+        SimpleDialog (
+            showDialog = showDeleteRegistryDialog,
+            onDismiss = { showDeleteRegistryDialog = false },
+            onSave = { /*TODO*/ },
+            dialogTitle = "Eliminar Registro",
+            dialogText = "El registro se eliminará de forma permanente",
+            confirmButtonText = "Eliminar"
+        )
+
+        // Añadir registro
+        AddRegistryDialog (
+            showDialog = showRegistryDialog,
+            onDismiss = { showRegistryDialog = false },
+            onSave = { glucosa, presionS, presionD -> /* TODO */ }
+        )
     }
 }
 
