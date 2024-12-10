@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -38,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.oceanmed.data.PatientData
 import com.example.oceanmed.dialogs.AddOrUpdatePatientDialog
 import com.example.oceanmed.ui.theme.ContrastBLue
 import com.example.oceanmed.ui.theme.PrimaryBlue
@@ -48,24 +53,32 @@ import com.example.oceanmed.ui.theme.SecondaryBlue
 fun RegistryView ( navController: NavController ) {
     var showPatientDialog by remember { mutableStateOf ( false ) }
     var searchText by remember { mutableStateOf ( "" ) }
+    var searchBarActive by remember { mutableStateOf ( false ) }
 
-    // usar una funcion que regrese los pacientes
+    // usar una funcion que regrese los pacientes con la info de PatientData
     // quitar estos pacientes de ejemplo y guardar en esta lista los pacientes traidos
     // desde la base de datos mediante ese metodo
     val patients = listOf (
-        "John Doe",
-        "María Pérez",
-        "Roberto Rodríguez",
-        "Sofía García",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
-        "Humberto medina",
+        PatientData ( "John Doe", 21, "Diabético" ),
+        PatientData ( "María Pérez", 21, "Diabético" ),
+        PatientData ( "Roberto Rodriguez", 21, "Diabético" ),
+        PatientData ( "Sofia García", 21, "Diabético" ),
+        PatientData ( "Jesus Flores", 21, "Diabético" ),
+        PatientData ( "Mariana Onofre", 21, "Diabético" ),
+        PatientData ( "Elena Maldonado", 21, "Diabético" ),
+        PatientData ( "Francisco Ruiz", 21, "Diabético" ),
+        PatientData ( "Itzel Orona", 21, "Diabético" ),
+        PatientData ( "Andrea Chavez", 21, "Diabético" ),
+        PatientData ( "Humberto Medina", 21, "Diabético" ),
+        PatientData ( "Rodrigo Macias", 21, "Diabético" ),
+        PatientData ( "Fernanda Torres", 21, "Diabético" ),
     )
+
+    val patients_showed = if ( searchText.isEmpty() ) {
+        patients
+    } else {
+        patients.filter { it.nombre.contains ( searchText, ignoreCase = true ) }
+    }
 
     Box ( modifier = Modifier.fillMaxSize() ) {
         Column (
@@ -73,10 +86,13 @@ fun RegistryView ( navController: NavController ) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            TextField (
-                value = searchText,
-                onValueChange = { searchText = it },
-                label = { Text ( "Buscar paciente" ) },
+            SearchBar (
+                query = searchText,
+                onQueryChange = { searchText = it },
+                onSearch = {  },
+                active = searchBarActive,
+                onActiveChange = { searchBarActive = it },
+                placeholder = { Text ( "Buscar paciente" ) },
                 leadingIcon = {
                     Icon (
                         imageVector = Icons.Default.Search,
@@ -84,74 +100,17 @@ fun RegistryView ( navController: NavController ) {
                     )
                 },
                 shape = RoundedCornerShape ( 28.dp ),
-                colors = TextFieldDefaults.textFieldColors (
-                    containerColor = SecondaryBlue,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                shadowElevation = 0.dp,
+                colors = SearchBarDefaults.colors ( containerColor = SecondaryBlue ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
                     .padding(top = 40.dp)
-            )
-
-            LazyColumn {
-                items ( patients ) { patient ->
-                    Card (
-                        onClick = {
-                            navController.navigate ( "patient" )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        colors = CardDefaults.cardColors (
-                            containerColor = PrimaryBlue
-                        )
-                    ) {
-                        Row (
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row (
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon (
-                                    Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = SecondaryBlue,
-                                    modifier = Modifier.size ( 40.dp )
-                                )
-
-                                Spacer ( modifier = Modifier.width ( 16.dp ) )
-
-                                Column {
-                                    Text (
-                                        text = patient,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp,
-                                        color = Color.White
-                                    )
-                                    Text (
-                                        text = "Datos x",
-                                        fontSize = 14.sp,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-
-                            Icon (
-                                Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size ( 24.dp )
-                            )
-                        }
-                    }
-                }
+            ) {
+                listaPacientes ( patients = patients_showed, navController = navController )
             }
+
+            listaPacientes ( patients = patients_showed, navController = navController )
         }
 
         FloatingActionButton (
@@ -179,8 +138,63 @@ fun RegistryView ( navController: NavController ) {
     }
 }
 
-//@Preview( showBackground = true)
-//@Composable
-//fun PreviewRegistryView() {
-//    RegistryView ( navController = null )
-//}
+@Composable
+fun listaPacientes ( patients: List<PatientData>, navController: NavController ) {
+    LazyColumn {
+        items ( patients ) { patient ->
+            Card (
+                onClick = {
+                    navController.navigate ( "patient" )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors (
+                    containerColor = PrimaryBlue
+                )
+            ) {
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon (
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            tint = SecondaryBlue,
+                            modifier = Modifier.size ( 40.dp )
+                        )
+
+                        Spacer ( modifier = Modifier.width ( 16.dp ) )
+
+                        Column {
+                            Text (
+                                text = patient.nombre,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
+                            Text (
+                                text = "${patient.edad} años - ${patient.condicion}",
+                                fontSize = 14.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    Icon (
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size ( 24.dp )
+                    )
+                }
+            }
+        }
+    }
+}
