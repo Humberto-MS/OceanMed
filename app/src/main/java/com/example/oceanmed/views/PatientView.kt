@@ -158,7 +158,7 @@ fun PatientView ( navController: NavController ) {
     Box (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 120.dp)
+            .padding(top = 140.dp)
     ) {
         Column(
             modifier = Modifier

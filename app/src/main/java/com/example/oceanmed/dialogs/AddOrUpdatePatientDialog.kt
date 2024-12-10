@@ -57,7 +57,9 @@ fun AddOrUpdatePatientDialog (
     var sizeDropdownExpanded by remember { mutableStateOf ( false ) }
     var conditionDropdownExpanded by remember { mutableStateOf ( false ) }
     val sizeOptions = listOf ( "XS", "S", "M", "L", "XL", "XXL" )
-    val conditionOptions = listOf ( "Ninguna", "Diabetes", "Hipertensión", "Hipertiroidismo", "Hipotiroidismo" )
+
+    val conditionOptions = listOf ( "Ninguna", "Diabetes", "Hipertensión", "Hipertiroidismo", "Hipotiroidismo",
+                                    "Asma", "Artritis", "Epilepsia", "Esclerosis", "Colitis", "Parkinson" )
 
     fun validateForm () {
         isFormValid = nombre.isNotBlank() && edad.isNotBlank() && peso.isNotBlank() &&
